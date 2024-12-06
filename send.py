@@ -209,7 +209,7 @@ def dkim_sign_message(msg, sender_email):
     try:
         with open(pem_file, "rb") as key_file:
             private_key = key_file.read()
-        dkim_headers = b"Content-Type:MIME-Version:Message-ID:From:To:Date:Subject:X-Priority:Return-Path:X-Hostname:"
+        dkim_headers = b"Content-Type:MIME-Version:Message-ID:From:To:Date:Subject:X-Priority:Return-Path:X-Hostname"
         sig = dkim.sign(
             message=msg.as_bytes(),
             selector=b"default",
