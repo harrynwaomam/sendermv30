@@ -209,7 +209,7 @@ def dkim_sign_message(msg, sender_email):
     try:
         with open(pem_file, "rb") as key_file:
             private_key = key_file.read()
-        dkim_headers = ["From","To","Subject","Date","Reply-To","Message-ID","X-Priority","X-Hostname"]
+        dkim_headers = ["From","To","Subject","Date","Reply-To","Message-ID","X-Priority","X-Hostname","MIME-Version"]
         sig = dkim.sign(
             message=msg.as_bytes(),
             selector=b"default",
@@ -248,10 +248,12 @@ def send_email(sender_email, sender_name, recipient_email, subject, body, recipi
         
         # Add custom header to include hostname
         msg["X-Hostname"] = hostname
-        
 
         boundary = replace_placeholders(boundary_template, recipient_email, sender_email, recipient_index)
         msg.set_boundary(boundary)
+        
+        # Add the required headers
+        msg["MIME-Version"] = "1.0"
 
         msg.attach(MIMEText(body, "html" if send_html_letter else "plain"))
 
