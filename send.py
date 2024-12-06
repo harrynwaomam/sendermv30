@@ -209,18 +209,15 @@ def dkim_sign_message(msg, sender_email):
     try:
         with open(pem_file, "rb") as key_file:
             private_key = key_file.read()
-        dkim_headers = b"Content-Type:MIME-Version:Message-ID:From:To:Date:Subject:X-Priority:Return-Path:X-Hostname"
+        dkim_headers = [b"from", b"to", b"subject"]
         sig = dkim.sign(
             message=msg.as_bytes(),
             selector=b"default",
             domain=sender_domain.encode(),
             privkey=private_key,
-            include_headers=dkim_headers.split(b":")
+            include_headers=dkim_headers
         )
-        # Manually construct DKIM-Signature header to ensure exact h= value
-        dkim_signature = sig.decode().replace("\r\n ", "")
-        dkim_signature = re.sub(r"h=.*?;", f"h={dkim_headers.decode()};", dkim_signature)
-        return dkim_signature.encode()
+        return sig
     except Exception as e:
         log_dkim(f"Failed to sign message for {sender_domain}: {e}")
         return None
