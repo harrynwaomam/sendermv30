@@ -212,12 +212,19 @@ def dkim_sign_message(msg, sender_email):
         dkim_headers = ["From","To","Subject","Date","Reply-To","Message-ID","X-Priority","X-Hostname","MIME-Version"]
         sig = dkim.sign(
             message=msg.as_bytes(),
-            selector=b"default",
+            selector=b"default2",
             domain=sender_domain.encode(),
             privkey=private_key,
             include_headers=dkim_headers
         )
-        return sig
+
+        # Ensure h= tag includes only the specified headers with correct capitalization
+        headers_str = ":".join(dkim_headers)
+        sig = sig.decode()
+        sig = re.sub(r"(?<!b)h=.*?;", f"h={headers_str};", sig)  # Replace only the h= field
+        sig = sig.replace("\n", "").replace("\r", "")  # Remove line breaks
+
+        return sig.encode()
     except Exception as e:
         log_dkim(f"Failed to sign message for {sender_domain}: {e}")
         return None
